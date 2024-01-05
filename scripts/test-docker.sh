@@ -3,6 +3,9 @@ docker run -d --name sca -p 3000:3000 -e "ENVIRONMENT=prod" -e "DEFAULT_API_KEY=
 
 echo "Starting Tests" && echo ""
 
+###### IMAGES #######
+
+#### Pulling ####
 echo "should both print a 500 image could not be pulled error"
 curl -X POST -H 'Authorization: Bearer 1234' -d "image=docker.io/library/asldfjlkdsfdsjfldjf" http://localhost:3000/docker/images/pull && echo ""
 curl -X POST -H 'Authorization: 1234' -d "image=docker.io/library/asldfjlkdsfdsjfldjf" http://localhost:3000/docker/images/pull && echo "" && echo ""
@@ -17,6 +20,10 @@ curl -X POST -H 'Authorization: 1234' -d "image=docker.io/library/busybox:1.24" 
 
 echo "Docker images (busybox latest 1.24)"
 docker images | grep busybox
+
+###### xx #######
+
+#### xx ####
 
 docker stop sca
 docker rm sca
