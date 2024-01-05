@@ -12,6 +12,13 @@ defined as env variable `DEFAULT_API_KEY`
 
 only needed if `ENVIRONMENT` is `prod`
 
+You need to provide the Header in one of two forms:
+
+```
+Authorization: <Key>
+Authorization: Bearer <Key>
+```
+
 ### docker
 
 **pull image**

@@ -78,7 +78,7 @@ func (a *AppConfig) setupServer() {
 	app.Use(logger.New())
 	if !utils.IsDev() {
 		app.Use(compress.New())
-		
+
 		app.Use(cache.New(cache.Config{
 			Next: func(c *fiber.Ctx) bool {
 				for _, pathMatch := range a.CACHE_INCLUDE {
@@ -100,6 +100,9 @@ func (a *AppConfig) setupServer() {
 		authMiddleware := keyauth.New(keyauth.Config{
 			KeyLookup: "header:Authorization",
 			Validator:  func(c *fiber.Ctx, key string) (bool, error) {
+				key = strings.TrimSpace(key)
+				key = strings.TrimPrefix(key, "Bearer ")
+
 				hashedAPIKey := sha256.Sum256([]byte(a.DEFAULT_API_KEY))
 				hashedKey := sha256.Sum256([]byte(key))
 	
