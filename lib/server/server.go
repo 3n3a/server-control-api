@@ -3,6 +3,8 @@ package server
 // Should only be imported by app.go
 
 import (
+	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -17,6 +19,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/keyauth"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
@@ -32,6 +35,7 @@ type AppConfig struct {
 	CACHE_LENGTH      time.Duration
 	APP_PORT          int
 	ENVIRONMENT       string
+	DEFAULT_API_KEY	  string
 }
 
 func (a *AppConfig) Setup() {
@@ -45,16 +49,19 @@ func (a *AppConfig) Setup() {
 
 	// ENv
 	a.ENVIRONMENT = os.Getenv("ENVIRONMENT")
-
+	
 	// Print config
 	fmt.Printf("=== Server Configuration ===\n")
 	configJson, _ := json.MarshalIndent(a, "", "  ")
 	fmt.Printf("%s\n", configJson)
-
+	
 	// Set Version to DEV
 	if utils.IsDev() {
 		a.VERSION = "devel"
 	}
+	
+	// Env Variables that should not be leaked!!
+	a.DEFAULT_API_KEY = os.Getenv("DEFAULT_API_KEY")
 
 	// start Gofiber server
 	a.setupServer()
@@ -71,6 +78,7 @@ func (a *AppConfig) setupServer() {
 	app.Use(logger.New())
 	if !utils.IsDev() {
 		app.Use(compress.New())
+		
 		app.Use(cache.New(cache.Config{
 			Next: func(c *fiber.Ctx) bool {
 				for _, pathMatch := range a.CACHE_INCLUDE {
@@ -87,6 +95,21 @@ func (a *AppConfig) setupServer() {
 				return c.OriginalURL()
 			},
 		}))
+
+		// See for more info: https://docs.gofiber.io/api/middleware/keyauth
+		authMiddleware := keyauth.New(keyauth.Config{
+			KeyLookup: "header:Authorization",
+			Validator:  func(c *fiber.Ctx, key string) (bool, error) {
+				hashedAPIKey := sha256.Sum256([]byte(a.DEFAULT_API_KEY))
+				hashedKey := sha256.Sum256([]byte(key))
+	
+				if subtle.ConstantTimeCompare(hashedAPIKey[:], hashedKey[:]) == 1 {
+					return true, nil
+				}
+				return false, keyauth.ErrMissingOrMalformedAPIKey
+			},
+		})
+		app.Use(authMiddleware)
 	}
 
 	// Setup routes & configure handlers

@@ -10,6 +10,10 @@ import (
 // * also supports podman (uses libpods docker-compatible api)
 // * may need to be run with "sudo"
 //
+// Sources:
+// 
+// * Docker Rest Api Reference: https://docs.docker.com/engine/api/latest
+// * Podman Rest Api Reference: https://docs.podman.io/en/latest/_static/api.html
 
 type ContainerTool int
 
@@ -36,12 +40,10 @@ func New(containerTool ContainerTool) Client {
 }
 
 func (d *Client) setupSocketUrl() {
-	d.socketUrl = "unix://"
-
 	switch d.containerTool {
 	case DockerTool:
-		d.socketUrl += "/var/run/docker.sock"
+		d.socketUrl = "/var/run/docker.sock"
 	case PodmanTool:
-		d.socketUrl += "/run/podman/podman.sock"
+		d.socketUrl = "/run/podman/podman.sock"
 	}
 }
