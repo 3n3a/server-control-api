@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/3n3a/server-control-api/handlers"
+	"github.com/3n3a/server-control-api/lib/docker"
 	"github.com/3n3a/server-control-api/lib/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
@@ -36,6 +37,8 @@ type AppConfig struct {
 	APP_PORT          int
 	ENVIRONMENT       string
 	DEFAULT_API_KEY	  string
+
+	INNER_CONFIG	  handlers.InnerConfig
 }
 
 func (a *AppConfig) Setup() {
@@ -49,6 +52,13 @@ func (a *AppConfig) Setup() {
 
 	// ENv
 	a.ENVIRONMENT = os.Getenv("ENVIRONMENT")
+	containerType := os.Getenv("CONTAINER_TYPE")
+	switch containerType {
+	case "podman":
+		a.INNER_CONFIG.CONTAINER_TYPE = docker.PodmanTool
+	default:
+		a.INNER_CONFIG.CONTAINER_TYPE = docker.DockerTool
+	}
 	
 	// Print config
 	fmt.Printf("=== Server Configuration ===\n")
@@ -67,8 +77,7 @@ func (a *AppConfig) Setup() {
 	a.setupServer()
 }
 
-func (a *AppConfig) setupServer() {
-	
+func (a *AppConfig) setupServer() {	
 
 	// Create fiber app
 	app := fiber.New(fiber.Config{})
@@ -116,7 +125,7 @@ func (a *AppConfig) setupServer() {
 	}
 
 	// Setup routes & configure handlers
-	handlers.Setup(app)
+	handlers.Setup(app, a.INNER_CONFIG)
 
 	// Handle not founds
 	app.Use(handlers.NotFound)

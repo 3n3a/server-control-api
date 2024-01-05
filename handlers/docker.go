@@ -12,7 +12,7 @@ var dockerConn docker.Client
 
 // // Will trick go into adding to HandlersList Array without executing a function 
 var setupDocker = AddHandler(func() {
-	dockerConn = docker.New(docker.DockerTool)
+	dockerConn = docker.New(innerConfig.CONTAINER_TYPE)
 
 	api := app.Group("/docker")
 
