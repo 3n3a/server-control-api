@@ -19,6 +19,14 @@ Authorization: <Key>
 Authorization: Bearer <Key>
 ```
 
+**generating an api key**
+
+use the following command
+
+```sh
+openssl rand -hex 32
+```
+
 ### docker
 
 **pull image**
