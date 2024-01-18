@@ -1,6 +1,9 @@
 package docker
 
 import (
+	"encoding/json"
+	"errors"
+
 	"github.com/3n3a/server-control-api/lib/utils"
 	"github.com/go-resty/resty/v2"
 )
@@ -11,7 +14,7 @@ import (
 // * may need to be run with "sudo"
 //
 // Sources:
-// 
+//
 // * Docker Rest Api Reference: https://docs.docker.com/engine/api/latest
 // * Podman Rest Api Reference: https://docs.podman.io/en/latest/_static/api.html
 
@@ -31,6 +34,10 @@ type Client struct {
 
 type CatchAllType []map[string]interface{}
 
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
 func New(containerTool ContainerTool) Client {
 	d := Client{}
 	d.containerTool = containerTool
@@ -46,4 +53,16 @@ func (d *Client) setupSocketUrl() {
 	case PodmanTool:
 		d.socketUrl = "/run/podman/podman.sock"
 	}
+}
+
+func (d *Client) getErrorResponse(response *resty.Response) error {
+	responseString := response.String()
+
+	var errRes ErrorResponse
+
+	err := json.Unmarshal([]byte(responseString), &errRes)
+	if err != nil {
+		return err
+	}
+	return errors.New(errRes.Message)
 }

@@ -1,12 +1,9 @@
 package docker
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/go-resty/resty/v2"
 )
 
 // Image Operations
@@ -14,10 +11,6 @@ import (
 const (
 	DefaultTag = "latest"
 )
-
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
 
 func (d *Client) PullImage(imageName string) (error) {
 	imageUrl, tag := d.getImageAndTag(imageName)
@@ -41,17 +34,7 @@ func (d *Client) PullImage(imageName string) (error) {
 	return nil
 }
 
-func (d *Client) getErrorResponse(response *resty.Response) error {
-	responseString := response.String()
 
-	var errRes ErrorResponse
-
-	err := json.Unmarshal([]byte(responseString), &errRes)
-	if err != nil {
-		return err
-	}
-	return errors.New(errRes.Message)
-}
 
 func (d *Client) getImageAndTag(imageName string) (string, string) {
 	splitResult := strings.Split(imageName, ":")

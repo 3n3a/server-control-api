@@ -18,6 +18,9 @@ var setupDocker = AddHandler(func() {
 
 	imagesApi := api.Group("/images")
 	imagesApi.Post("/pull", PullImage)
+
+	containerApi := api.Group("/containers")
+	containerApi.Post("/restart", RestartContainer)
 })
 
 // Pull Image
@@ -39,4 +42,25 @@ func PullImage(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(fiber.Map{"message": "image successfully pulled", "status": "success"})
+}
+
+// Restart Container
+// Request
+// name: Name or Id of container
+// Responses:
+// 200: Successfully restarted container
+// 500: container could not be restarted
+func RestartContainer(c *fiber.Ctx) error {
+	containerName := c.FormValue("name")
+	err := dockerConn.RestartContainer(containerName)
+	if err != nil {
+		if utils.IsDev() {
+			fmt.Println(err)
+		}
+		return c.Status(500).JSON(fiber.Map{
+			"message": err.Error(),
+			"status": "error",
+		})
+	}
+	return c.JSON(fiber.Map{"message": "container successfully restarted", "status": "success"})
 }

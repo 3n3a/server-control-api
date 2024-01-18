@@ -33,7 +33,7 @@ openssl rand -hex 32
 
 url:
 ```
-/docker/pull
+POST /docker/images/pull
 ```
 
 params:
@@ -46,6 +46,28 @@ responses:
 
 ```
 200: Successfully Pulled Image
+500: Some Error with Docker Tool occurred
+
+body structure: {message: "", status: "error | success"}
+```
+
+**restart container**
+
+url:
+```
+POST /docker/containers/restart
+```
+
+params:
+
+```
+name: name or id of container
+```
+
+responses:
+
+```
+200: Successfully restarted container
 500: Some Error with Docker Tool occurred
 
 body structure: {message: "", status: "error | success"}
