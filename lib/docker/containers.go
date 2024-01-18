@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	DefaultContainerKillSignal = "SIGKILL"
+	DefaultContainerKillSignal = "SIGTERM"
 	DefaultContainerKillTimeout = "10"
 )
 
