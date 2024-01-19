@@ -12,13 +12,13 @@ Exposes Systemd, Podman as a REST-Api with key-based authentication.
 docker rm -f sca && docker run --privileged=true --security-opt seccomp=unconfined --cap-add=SYS_ADMIN -d -p 3003:3000 -v /run/dbus/system_bus_socket:/run/dbus/system_bus_socket --name sca -e 'ENVIRONMENT=dev' --env DBUS_SESSION_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket" -e 'DEFAULT_API_KEY=1234' sca
 ```
 
-tbd how to do it in podman + in systemd podman.
+confirmed to work in:
+* docker
+* podman
+* podman-systemd (quadlets)
 
-with above command can successfully restart services of host
-
-### bugs
-
-> can only restart systemd service once --> maybe close connection after doing action...
+> **ATTENTION**: The developer is not liable for anything that happens when using this software.
+> This is potentially insecure to set-up a container this way and to expose system-service as a REST-Api to the outside world.
 
 ## api
 
@@ -87,6 +87,30 @@ responses:
 ```
 200: Successfully restarted container
 500: Some Error with Docker Tool occurred
+
+body structure: {message: "", status: "error | success"}
+```
+
+### systemd
+
+**restart service**
+
+url:
+```
+POST /systemd/restart
+```
+
+params:
+
+```
+name: name of unit
+```
+
+responses:
+
+```
+200: Successfully restarted service
+500: Error occurred with systemd
 
 body structure: {message: "", status: "error | success"}
 ```
