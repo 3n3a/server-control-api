@@ -15,7 +15,6 @@ type SystemDConn struct {
 
 func New() SystemDConn {
 	s := SystemDConn{}
-	s.Connect()
 	return s
 }
 
@@ -27,13 +26,22 @@ func (s *SystemDConn) Connect() (error) {
 }
 
 func (s *SystemDConn) RestartService(name string) (error) {
+	s.Connect()
+
 	// mode docs: https://www.freedesktop.org/wiki/Software/systemd/dbus/#methods
 	// read under "StartUnit()" talks about mode string
 	channel := make(chan string)
-	number, err := s.conn.RestartUnitContext(s.ctx, name, "replace", channel)
+	var err error
+	var number int
+	go func ()  {
+		number, err = s.conn.RestartUnitContext(s.ctx, name, "replace", channel)
+	}()
 	fmt.Printf("Number from Restart Service: %d", number)
-	// res := <- channel
-	// fmt.Println("; Channel: %s", res)
+	res := <- channel
+	fmt.Printf("; Channel: %s\n", res)
+
+	s.Close()
+
 	return err
 }
 

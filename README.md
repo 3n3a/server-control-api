@@ -16,6 +16,9 @@ tbd how to do it in podman + in systemd podman.
 
 with above command can successfully restart services of host
 
+### bugs
+
+> can only restart systemd service once --> maybe close connection after doing action...
 
 ## api
 
